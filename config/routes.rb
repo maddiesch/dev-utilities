@@ -8,5 +8,5 @@ Jets.application.routes.draw do
   get 'v1/status',         to: 'utilities#status_index'
   get 'v1/status/:status', to: 'utilities#status'
 
-  any '*catchall', to: 'application#not_found'
+  any '*catchall', to: 'shared#not_found'
 end
