@@ -26,4 +26,24 @@ RSpec.describe UtilitiesController, type: :controller do
 
     it { expect(response.status).to eq 200 }
   end
+
+  describe '#echo' do
+    before { get '/v1/echo' }
+
+    it { expect(response.status).to eq 200 }
+  end
+
+  describe '#status' do
+    context 'given a valid HTTP status' do
+      before { get '/v1/status/:status', status: '201' }
+
+      it { expect(response.status).to eq 201 }
+    end
+
+    context 'given an invalid HTTP status' do
+      before { get '/v1/status/:status', status: '599' }
+
+      it { expect(response.status).to eq 400 }
+    end
+  end
 end

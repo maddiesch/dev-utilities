@@ -59,4 +59,64 @@ class UtilitiesController < ApplicationController
     }
     render(json: json)
   end
+
+  def echo
+    json = {
+      data: [
+        {
+          type: 'request',
+          attributes: {
+            method: request.request_method,
+            url: request.url
+          }
+        },
+        {
+          type: 'headers',
+          attributes: request.headers
+        },
+        {
+          type: 'body',
+          attributes: {
+            content: request.body.read.presence
+          }
+        }
+      ]
+    }
+    render(json: json)
+  end
+
+  def status
+    codes = JSON.parse(File.read(Jets.root.join('config', 'status_codes.json')))
+    status_code = params[:status].to_i
+    status_name = codes[status_code.to_s]
+
+    if status_name.present?
+      json = {
+        data: {
+          type: 'status',
+          attributes: {
+            description: "[#{status_code}] #{status_name}",
+            http_status: status_code,
+            status_name: status_name
+          }
+        }
+      }
+      render(json: json, status: status_code)
+    else
+      json = {
+        errors: [
+          {
+            status: '400',
+            code: 'unknown_http_status',
+            title: 'Unknown Status Code',
+            detail: "The status code #{status_code} is not recognized.",
+            meta: {
+              status_codes: codes
+            }
+          }
+        ]
+      }
+      render(json: json, status: 400)
+    end
+  end
 end
