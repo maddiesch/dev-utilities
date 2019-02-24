@@ -85,10 +85,13 @@ class UtilitiesController < ApplicationController
     render(json: json)
   end
 
+  def status_index
+    render(json: { data: complex_http_status_codes })
+  end
+
   def status
-    codes = JSON.parse(File.read(Jets.root.join('config', 'status_codes.json')))
     status_code = params[:status].to_i
-    status_name = codes[status_code.to_s]
+    status_name = self.class.http_status_codes[status_code.to_s]
 
     if status_name.present?
       json = {
@@ -111,12 +114,33 @@ class UtilitiesController < ApplicationController
             title: 'Unknown Status Code',
             detail: "The status code #{status_code} is not recognized.",
             meta: {
-              status_codes: codes
+              status_codes: complex_http_status_codes
             }
           }
         ]
       }
       render(json: json, status: 400)
+    end
+  end
+
+  def self.http_status_codes
+    @http_status_codes ||= JSON.parse(File.read(Jets.root.join('config', 'status_codes.json')))
+  end
+
+  private
+
+  def complex_http_status_codes
+    self.class.http_status_codes.map do |code, name|
+      {
+        type: 'http_status',
+        id: code.to_s,
+        attributes: {
+          name: name
+        },
+        links: {
+          self: "#{request.scheme}://#{request.host}/v1/status/#{code}"
+        }
+      }
     end
   end
 end

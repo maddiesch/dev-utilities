@@ -46,4 +46,10 @@ RSpec.describe UtilitiesController, type: :controller do
       it { expect(response.status).to eq 400 }
     end
   end
+
+  describe '#status_index' do
+    before { get '/v1/status' }
+
+    it { expect(response.status).to eq 200 }
+  end
 end
